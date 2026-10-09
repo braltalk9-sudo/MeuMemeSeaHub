@@ -1,0 +1,66 @@
+-- Redz Hub OpenSource / Base
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getRemote()
+    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+        if obj:IsA("RemoteFunction") or obj:IsA("RemoteEvent") then
+            local name = string.lower(obj.Name)
+            if string.find(name, "gacha") or string.find(name, "buyfruit") or string.find(name, "commf") or string.find(name, "roll") then
+                return obj
+            end
+        end
+    end
+    return nil
+end
+
+local function rollMoney()
+    local remote = getRemote()
+    if remote then
+        pcall(function()
+            if remote:IsA("RemoteFunction") then
+                remote:InvokeServer("Gacha", "Money")
+                remote:InvokeServer("BuyFruit", "Money")
+            elseif remote:IsA("RemoteEvent") then
+                remote:FireServer("Gacha", "Money")
+                remote:FireServer("BuyFruit", "Money")
+            end
+        end)
+    end
+end
+
+local function rollGems()
+    local remote = getRemote()
+    if remote then
+        pcall(function()
+            if remote:IsA("RemoteFunction") then
+                remote:InvokeServer("Gacha", "Gems")
+                remote:InvokeServer("BuyFruit", "Gems")
+            elseif remote:IsA("RemoteEvent") then
+                remote:FireServer("Gacha", "Gems")
+                remote:FireServer("BuyFruit", "Gems")
+            end
+        end)
+    end
+end
+
+local function storeFruits()
+    local remote = getRemote()
+    if not remote then return end
+    for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            pcall(function()
+                if remote:IsA("RemoteFunction") then
+                    remote:InvokeServer("StoreFruit", tool.Name)
+                elseif remote:IsA("RemoteEvent") then
+                    remote:FireServer("StoreFruit", tool.Name)
+                end
+            end)
+        end
+    end
+end
+pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/MemeSea/refs/heads/main/Source.lua"))()
+end)
